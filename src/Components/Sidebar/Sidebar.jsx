@@ -10,6 +10,9 @@ import {
 import { NavLink } from "react-router-dom";
 
 import { PiDressLight } from "react-icons/pi";
+import NavLinkWithIcon from "./NavLinkWithIcon";
+import Logo from "../Logo";
+
 const Sidebar = ({ openSidebarToggle, OpenSidebar }) => {
   return (
     <aside
@@ -17,10 +20,7 @@ const Sidebar = ({ openSidebarToggle, OpenSidebar }) => {
       className={openSidebarToggle ? "sidebar-responsive" : ""}
     >
       <div className="sidebar-title">
-        <div className="sidebar-brand">
-          <PiDressLight className="icon_header" />
-          Handloom
-        </div>
+        <Logo />
         <span className="icon close_icon" onClick={OpenSidebar}>
           X
         </span>
@@ -28,46 +28,53 @@ const Sidebar = ({ openSidebarToggle, OpenSidebar }) => {
 
       <ul className="sidebar-list">
         <li className="sidebar-list-item">
-          <NavLink to="/">
-            <BsGrid1X2Fill className="icon" />
-            Dashboard
-          </NavLink>
+          <NavLinkWithIcon
+            to={"/"}
+            icon={<BsGrid1X2Fill className="icon" />}
+            label={"Dashboard"}
+          />
         </li>
         <li className="sidebar-list-item">
-          <NavLink to="/products">
-            <BsFillArchiveFill className="icon" />
-            Products
-          </NavLink>
+          <NavLinkWithIcon
+            to={"/products"}
+            icon={<BsFillArchiveFill className="icon" />}
+            label={"Products"}
+          />
         </li>
         <li className="sidebar-list-item">
-          <NavLink to="/categories">
-            <BsFillGrid3X3GapFill className="icon" />
-            Categories
-          </NavLink>
+          <NavLinkWithIcon
+            to={"/categories"}
+            icon={<BsFillGrid3X3GapFill className="icon" />}
+            label={"Categories"}
+          />
         </li>
         <li className="sidebar-list-item">
-          <NavLink to="/customers">
-            <BsPeopleFill className="icon" />
-            Customers
-          </NavLink>
+          <NavLinkWithIcon
+            to={"/customers"}
+            icon={<BsPeopleFill className="icon" />}
+            label={"Customers"}
+          />
         </li>
         <li className="sidebar-list-item">
-          <NavLink to="/inventory">
-            <BsListCheck className="icon" />
-            Inventory
-          </NavLink>
+          <NavLinkWithIcon
+            to={"/inventory"}
+            icon={<BsListCheck className="icon" />}
+            label={"Inventory"}
+          />
         </li>
         <li className="sidebar-list-item">
-          <NavLink to="/addproduct">
-            <BsListCheck className="icon" />
-            AddProducts
-          </NavLink>
+          <NavLinkWithIcon
+            to={"/addproduct"}
+            icon={<BsListCheck className="icon" />}
+            label={"AddProducts"}
+          />
         </li>
         <li className="sidebar-list-item">
-          <NavLink to="/setting">
-            <BsFillGearFill className="icon" />
-            Settings
-          </NavLink>
+          <NavLinkWithIcon
+            to={"/setting"}
+            icon={<BsFillGearFill className="icon" />}
+            label={"Settings"}
+          />
         </li>
       </ul>
     </aside>

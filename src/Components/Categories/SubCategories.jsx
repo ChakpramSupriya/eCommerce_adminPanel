@@ -11,23 +11,24 @@ import {
 } from "@tanstack/react-query";
 import { queryMutationKeys } from "@/constants/queryMutationKeys";
 import { BASE_URL } from "@/constants/apiDetails";
-import { createCategory } from "@/api/createCategory";
 import { deleteCategory } from "@/api/deleteCategory";
 import { updateCategory } from "@/api/updateCategory";
 import { useNavigate } from "react-router-dom";
+import { createSubCategory } from "@/api/subcategory";
 
-const Categories = () => {
+const SubCategories = () => {
   const navigate = useNavigate();
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
   const queryClient = new QueryClient();
 
-  // const query = useQuery({ queryKey: ['category'], queryFn: getCategory })
-  const getCategory = async () => {
-    const response = await fetch(`${BASE_URL}/category/allcategory`);
+  const getSubCategory = async () => {
+    const categoryId = JSON.parse(localStorage.getItem("cId"));
+    const response = await fetch(
+      `${BASE_URL}/subCategory/${categoryId}/getSubCategory`
+    );
     const data = await response.json();
-    console.log(data);
 
-    setCategories(data.category);
+    setSubCategories(data.subCategory);
 
     // console.log("data json");
 
@@ -36,28 +37,28 @@ const Categories = () => {
     return data;
   };
 
-  const [categories, setCategories] = useState([]);
+  const [categories, setSubCategories] = useState([]);
   const { data, error, isLoading } = useQuery({
-    queryKey: ["category"],
-    queryFn: getCategory,
+    queryKey: ["subCategory"],
+    queryFn: getSubCategory,
     onSuccess: (data) => {
       console.log(data);
     },
   });
 
   const { mutate, isPending } = useMutation({
-    mutationKey: queryMutationKeys.createCategory,
-    mutationFn: createCategory,
+    mutationKey: queryMutationKeys,
+    mutationFn: createSubCategory,
     onSuccess: () => {
       queryClient.invalidateQueries(["category"]);
-      toast.success("Category added successfully");
+      toast.success("SubCategory added successfully");
     },
     onError: (error) => {
-      toast.error(`Failed to add category: ${error.message}`);
+      toast.error(`Failed to add subcategory: ${error.message}`);
     },
   });
 
-  const [newCategory, setNewCategory] = useState("");
+  const [subCategoryName, setNewSubCategory] = useState("");
   const [isEditing, setIsEditing] = useState(null);
   const [editCategory, setEditCategory] = useState("");
 
@@ -66,14 +67,14 @@ const Categories = () => {
   };
 
   const handleAddCategory = () => {
-    if (newCategory.trim()) {
+    if (subCategoryName.trim()) {
       1;
-      setCategories([...categories, { name: newCategory }]);
-      setNewCategory("");
+      setSubCategories([...categories, { subCategoryName: subCategoryName }]);
+      setNewSubCategory("");
     }
-    console.log(newCategory);
+    console.log(subCategoryName);
     mutate({
-      name: newCategory,
+      subCategoryName,
     });
   };
 
@@ -85,7 +86,7 @@ const Categories = () => {
   const handleSaveEdit = (categoryId) => {
     const updatedCategories = [...categories];
     updatedCategories[categoryId] = editCategory;
-    setCategories(updatedCategories);
+    setSubCategories(updatedCategories);
     setIsEditing(null);
     setEditCategory("");
     console.log(categoryId);
@@ -110,7 +111,7 @@ const Categories = () => {
     const updatedCategories = categories.filter(
       (item) => item._id !== categoryId
     );
-    setCategories(updatedCategories);
+    setSubCategories(updatedCategories);
   };
 
   const updateMutation = useMutation({
@@ -141,14 +142,14 @@ const Categories = () => {
         <Header OpenSidebar={OpenSidebar} />
         <div className="flex-grow p-6 bg-gray-100">
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Categories</h2>
+            <h2 className="text-xl font-bold mb-4">Subcategories</h2>
 
             <div className="flex gap-2 mb-6">
               <input
                 type="text"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="Add a new category"
+                value={subCategoryName}
+                onChange={(e) => setNewSubCategory(e.target.value)}
+                placeholder="Add a new subcategory"
                 className="flex-grow p-2 border border-gray-300 rounded-lg"
               />
               <button
@@ -157,7 +158,7 @@ const Categories = () => {
                 onClick={handleAddCategory}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
               >
-                {isPending ? "Please wait..." : "Add Category"}
+                {isPending ? "Please wait..." : "Add Subcategory"}
               </button>
             </div>
 
@@ -192,20 +193,9 @@ const Categories = () => {
                     </div>
                   ) : (
                     <>
-                      <span className="flex-grow">{category.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          localStorage.setItem(
-                            "cId",
-                            JSON.stringify(category._id)
-                          );
-                          navigate(`/categories/${category.name}`);
-                        }}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                      >
-                        View
-                      </button>
+                      <span className="flex-grow">
+                        {category.subCategoryName}
+                      </span>
                       <button
                         type="button"
                         onClick={() => handleEditCategory(index)}
@@ -232,4 +222,4 @@ const Categories = () => {
   );
 };
 
-export default Categories;
+export default SubCategories;
