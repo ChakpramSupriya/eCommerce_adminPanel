@@ -3,10 +3,23 @@ import Header from "../Header/Header";
 import Sidebar from "../Sidebar/Sidebar";
 import { Table, Button } from "@mantine/core";
 import axios from "axios";
+import { BASE_URL } from "@/constants/apiDetails";
+import { fetchProducts } from "@/api/product";
+import { useQuery } from "@tanstack/react-query";
 
 const Products = () => {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
   const [products, setProducts] = useState([]);
+
+  const {
+    data: allproduct,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["product"],
+    queryFn: fetchProducts,
+  });
 
   const OpenSidebar = () => {
     setOpenSidebarToggle(!openSidebarToggle);
@@ -14,9 +27,7 @@ const Products = () => {
 
   const getProduct = async () => {
     try {
-      const { data } = await axios.get(
-        "https://e-commerce-ten-rust.vercel.app/product/allproduct"
-      );
+      const { data } = await axios.get(`${BASE_URL}}/product/allproduct`);
       setProducts(data.products);
     } catch (error) {
       console.log(error);
@@ -33,60 +44,66 @@ const Products = () => {
     updatedProducts[index].discount = newDiscount;
     setProducts(updatedProducts);
   };
+  if (isLoading) return "Loading...";
+  if (isError) return `Error: ${error.message}`;
 
   const updateDiscount = async (productId, discount) => {
     try {
-      await axios.patch(
-        `https://e-commerce-ten-rust.vercel.app/product/${productId}/updateDiscount`,
-        { discount }
-      );
-      getProduct(); // Fetch updated products after successful update
+      await axios.patch(`${BASE_URL}/${productId}/updateDiscount`, {
+        discount,
+      });
+      getProduct();
     } catch (error) {
       console.log(error);
     }
   };
 
-  const rows = products.map((element, index) => (
-    <Table.Tr key={element._id}>
-      <Table.Td>{element._id}</Table.Td>
-      <Table.Td style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <img
-          src={`http://drive.google.com/thumbnail?id=${element?.image_id[0]?.replace(
-            /"/g,
-            ""
-          )}`}
-          alt="data"
-          width={"40px"}
-          height={"40px"}
-          style={{ borderRadius: "50%" }}
-        />
-        <p>{element.name}</p>
-      </Table.Td>
-      <Table.Td>{element.category.name}</Table.Td>
-      <Table.Td>{element.quantity}</Table.Td>
-      <Table.Td>₹ {element.price}</Table.Td>
-      <Table.Td>
-        <input
-          type="number"
-          value={element.discount || 0}
-          onChange={(e) => handleDiscountChange(index, e.target.value)}
-          style={{ width: "60px" }}
-        />
-        <Button
-          onClick={() => updateDiscount(element._id, element.discount || 0)}
-          style={{ marginLeft: "10px" }}
+  data.products.map((element, index) => {
+    return (
+      <Table.Tr key={element._id}>
+        <Table.Td>{element._id}</Table.Td>
+        <Table.Td
+          style={{ display: "flex", alignItems: "center", gap: "10px" }}
         >
-          Update
-        </Button>
-      </Table.Td>
-      <Table.Td>
-        ₹{" "}
-        {calculateDiscountedPrice(element.price, element.discount || 0).toFixed(
-          2
-        )}
-      </Table.Td>
-    </Table.Tr>
-  ));
+          <img
+            src={`http://drive.google.com/thumbnail?id=${element?.image_id[0]?.replace(
+              /"/g,
+              ""
+            )}`}
+            alt="data"
+            width={"40px"}
+            height={"40px"}
+            style={{ borderRadius: "50%" }}
+          />
+          <p>{element?.name}</p>
+        </Table.Td>
+        <Table.Td>{element?.category?.name}</Table.Td>
+        <Table.Td>{element.quantity}</Table.Td>
+        <Table.Td>₹ {element.price}</Table.Td>
+        <Table.Td>
+          <input
+            type="number"
+            value={element.discount || 0}
+            onChange={(e) => handleDiscountChange(index, e.target.value)}
+            style={{ width: "60px" }}
+          />
+          <Button
+            onClick={() => updateDiscount(element._id, element.discount || 0)}
+            style={{ marginLeft: "10px" }}
+          >
+            Update
+          </Button>
+        </Table.Td>
+        <Table.Td>
+          ₹{" "}
+          {calculateDiscountedPrice(
+            element.price,
+            element.discount || 0
+          ).toFixed(2)}
+        </Table.Td>
+      </Table.Tr>
+    );
+  });
 
   useEffect(() => {
     getProduct();

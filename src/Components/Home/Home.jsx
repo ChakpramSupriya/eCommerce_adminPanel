@@ -1,3 +1,5 @@
+import { BASE_URL } from "@/constants/apiDetails";
+import { CloudHail } from "lucide-react";
 import React from "react";
 import {
   BsFillArchiveFill,
@@ -5,6 +7,13 @@ import {
   BsPeopleFill,
   BsFillBellFill,
 } from "react-icons/bs";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
 import {
   BarChart,
@@ -21,7 +30,6 @@ import {
 } from "recharts";
 
 const Home = () => {
-  // barchart
   const data = [
     {
       name: "Page A",
@@ -35,58 +43,92 @@ const Home = () => {
       pv: 1398,
       amt: 2210,
     },
-    {
-      name: "Page C",
-      uv: 2000,
-      pv: 9800,
-      amt: 2290,
-    },
-    {
-      name: "Page D",
-      uv: 2780,
-      pv: 3908,
-      amt: 2000,
-    },
-    {
-      name: "Page E",
-      uv: 1890,
-      pv: 4800,
-      amt: 2181,
-    },
-    {
-      name: "Page F",
-      uv: 2390,
-      pv: 3800,
-      amt: 2500,
-    },
-    {
-      name: "Page G",
-      uv: 3490,
-      pv: 4300,
-      amt: 2100,
-    },
   ];
 
-  // piechart
   const data01 = [
     { name: "Group A", value: 400 },
     { name: "Group B", value: 300 },
-    { name: "Group C", value: 300 },
-    { name: "Group D", value: 200 },
   ];
   const data02 = [
     { name: "A1", value: 100 },
     { name: "A2", value: 300 },
-    { name: "B1", value: 100 },
-    { name: "B2", value: 80 },
-    { name: "B3", value: 40 },
-    { name: "B4", value: 30 },
-    { name: "B5", value: 50 },
-    { name: "C1", value: 100 },
-    { name: "C2", value: 200 },
-    { name: "D1", value: 150 },
-    { name: "D2", value: 50 },
   ];
+
+  // Fetch products
+  const products = async () => {
+    const response = await fetch(`${BASE_URL}/product/total`);
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    return response.json();
+  };
+
+  const {
+    data: product,
+    isLoading: isProductLoading,
+    error: productError,
+  } = useQuery({
+    queryKey: ["product"],
+    queryFn: products,
+  });
+
+  // Fetch categories
+  const categories = async () => {
+    const response = await fetch(`${BASE_URL}/category/categoryCount`);
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    return response.json();
+  };
+
+  const {
+    data: category,
+    isLoading: isCategoryLoading,
+    error: categoryError,
+  } = useQuery({
+    queryKey: ["category"],
+    queryFn: categories,
+  });
+  // console.log(category);
+
+  //fetch customers
+  const customers = async () => {
+    const response = await fetch(`${BASE_URL}/user/totalUsers`);
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    return response.json();
+  };
+
+  const {
+    data: customer,
+    isLoading: isCustomerLoading,
+    error: CustomerError,
+  } = useQuery({
+    queryKey: ["customer"],
+    queryFn: customers,
+  });
+  if (isProductLoading || isCategoryLoading || isCustomerLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (productError || categoryError || isCustomerLoading) {
+    return (
+      <div>
+        Error:{" "}
+        {productError?.message ||
+          categoryError?.message ||
+          CustomerError?.message}
+      </div>
+    );
+  }
+
   return (
     <main className="main-container">
       <div className="main-title">
@@ -99,21 +141,21 @@ const Home = () => {
             <h3>PRODUCTS</h3>
             <BsFillArchiveFill className="card_icon" />
           </div>
-          <h1>100</h1>
+          <h1>{product ? product.total : "No Data"}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
             <h3>CATEGORIES</h3>
             <BsFillGrid3X3GapFill className="card_icon" />
           </div>
-          <h1>12</h1>
+          <h1>{category ? category.total : "No Category"}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
             <h3>CUSTOMERS</h3>
             <BsPeopleFill className="card_icon" />
           </div>
-          <h1>33</h1>
+          <h1>{customer ? customer.total : "No Customer"}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
@@ -142,16 +184,8 @@ const Home = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar
-              dataKey="pv"
-              fill="#8884d8"
-              activeBar={<Rectangle fill="pink" stroke="blue" />}
-            />
-            <Bar
-              dataKey="uv"
-              fill="#82ca9d"
-              activeBar={<Rectangle fill="gold" stroke="purple" />}
-            />
+            <Bar dataKey="pv" fill="#8884d8" />
+            <Bar dataKey="uv" fill="#82ca9d" />
           </BarChart>
         </ResponsiveContainer>
 

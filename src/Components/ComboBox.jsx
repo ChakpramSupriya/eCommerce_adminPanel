@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import useMediaQuery from "../hooks/use-media-query";
 import { Button } from "./ui/button";
 import {
@@ -95,9 +94,9 @@ function OptionList({ setOpen, setSelectedStatus, data }) {
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
-          {data.map((status) => (
+          {data.map((status, idx) => (
             <CommandItem
-              key={status.value}
+              key={idx}
               value={status.value}
               onSelect={(value) => {
                 console.log(value, data);

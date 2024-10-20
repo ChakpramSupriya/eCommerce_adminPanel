@@ -14,7 +14,8 @@ body{
 .icon_header{
   vertical-align: middle;
   line-height: 1px;
-  font-size: 26px;
+  font-size: 18px;
+  object-fit: cover;
 }
 .icon,.icon_header{
   margin-right: 5px;
@@ -25,6 +26,7 @@ body{
   margin-left: 30px;
   margin-top: 10px;
   cursor: pointer;
+  color: white;
 }
 .grid-container{
   display: grid;
@@ -52,8 +54,9 @@ body{
 /* sidebar */
 #sidebar{
   grid-area: sidebar;
-  height: 100%;
-  background-color: #263043;
+  /* height: 100%;
+  background-color: #263043; */
+  /* background-color: green; */
   overflow-y: auto;
   transition: all 0.5s;
   -webkit-transition: all 0.5s;

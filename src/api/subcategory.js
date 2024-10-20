@@ -18,3 +18,13 @@ export const createSubCategory = async (subCategoryName) => {
 
   return response.json();
 };
+
+export async function fetchSubCategories(categoryId) {
+  const response = await fetch(
+    `${BASE_URL}/subCategory/${categoryId}/getSubCategory`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch subcategories");
+  }
+  return response.json();
+}

@@ -135,11 +135,11 @@ const Categories = () => {
       <Sidebar
         openSidebarToggle={openSidebarToggle}
         OpenSidebar={OpenSidebar}
-        className="w-64 bg-gray-800 text-white"
+        // className="w-64 bg-gray-800 text-white"
       />
       <div className="flex flex-col flex-grow">
         <Header OpenSidebar={OpenSidebar} />
-        <div className="flex-grow p-6 bg-gray-100">
+        <div className="flex-grow p-6  bg-gray-100">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">Categories</h2>
 
