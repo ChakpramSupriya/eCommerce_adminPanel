@@ -21,18 +21,10 @@ const Categories = () => {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
   const queryClient = new QueryClient();
 
-  // const query = useQuery({ queryKey: ['category'], queryFn: getCategory })
   const getCategory = async () => {
     const response = await fetch(`${BASE_URL}/category/allcategory`);
     const data = await response.json();
-    console.log(data);
-
     setCategories(data.category);
-
-    // console.log("data json");
-
-    // console.log(data.catego.map((category) => category.category.name));
-    // return data.map((category) => category.name);
     return data;
   };
 
@@ -40,9 +32,6 @@ const Categories = () => {
   const { data, error, isLoading } = useQuery({
     queryKey: ["category"],
     queryFn: getCategory,
-    onSuccess: (data) => {
-      console.log(data);
-    },
   });
 
   const { mutate, isPending } = useMutation({
@@ -67,11 +56,9 @@ const Categories = () => {
 
   const handleAddCategory = () => {
     if (newCategory.trim()) {
-      1;
       setCategories([...categories, { name: newCategory }]);
       setNewCategory("");
     }
-    console.log(newCategory);
     mutate({
       name: newCategory,
     });
@@ -88,7 +75,6 @@ const Categories = () => {
     setCategories(updatedCategories);
     setIsEditing(null);
     setEditCategory("");
-    console.log(categoryId);
     handleUpdateCategory(categoryId, { name: editCategory });
   };
 
@@ -98,7 +84,6 @@ const Categories = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(["category"]);
       toast.success("Category deleted successfully");
-      console.log("object deleted successfully");
     },
     onError: (error) => {
       toast.error(`Failed to delete category: ${error.message}`);
@@ -119,7 +104,6 @@ const Categories = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(["category"]);
       toast.success("Category updated successfully");
-      console.log("Category updated successfully");
     },
     onError: (error) => {
       toast.error(`Failed to update category: ${error.message}`);
@@ -131,70 +115,69 @@ const Categories = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="grid-container">
+      <Header OpenSidebar={OpenSidebar} />
       <Sidebar
         openSidebarToggle={openSidebarToggle}
         OpenSidebar={OpenSidebar}
-        // className="w-64 bg-gray-800 text-white"
       />
-      <div className="flex flex-col flex-grow">
-        <Header OpenSidebar={OpenSidebar} />
-        <div className="flex-grow p-6  bg-gray-100">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Categories</h2>
+      <div className="flex flex-col flex-grow ">
+        <div className="flex-grow p-6">
+          <div className=" p-6 rounded-lg shadow-md max-w-4xl mx-auto">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Categories
+            </h2>
 
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-4 mb-6">
               <input
                 type="text"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="Add a new category"
-                className="flex-grow p-2 border border-gray-300 rounded-lg"
+                placeholder="Enter category name"
+                className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
               <button
                 disabled={isPending}
-                type="submit"
                 onClick={handleAddCategory}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition"
               >
-                {isPending ? "Please wait..." : "Add Category"}
+                {isPending ? "Adding..." : "Add Category"}
               </button>
             </div>
 
             <div className="space-y-4">
               {categories.map((category, index) => (
                 <div
-                  key={index}
-                  className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow"
+                  key={category._id}
+                  className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md hover:bg-gray-50"
                 >
                   {isEditing === index ? (
-                    <div className="flex-grow flex gap-2">
+                    <div className="flex gap-2 w-full">
                       <input
                         type="text"
                         value={editCategory}
                         onChange={(e) => setEditCategory(e.target.value)}
-                        className="flex-grow p-2 border border-gray-300 rounded-lg"
+                        className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       />
                       <button
-                        type="button"
                         onClick={() => handleSaveEdit(category._id)}
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                        className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                       >
                         Save
                       </button>
                       <button
-                        type="button"
                         onClick={() => setIsEditing(null)}
-                        className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                        className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
                       >
                         Cancel
                       </button>
                     </div>
                   ) : (
-                    <>
-                      <span className="flex-grow">{category.name}</span>
+                    <div className="flex items-center gap-4 w-full">
+                      <span className="flex-grow text-gray-700 text-sm">
+                        {category.name}
+                      </span>
                       <button
-                        type="button"
                         onClick={() => {
                           localStorage.setItem(
                             "cId",
@@ -202,25 +185,23 @@ const Categories = () => {
                           );
                           navigate(`/categories/${category.name}`);
                         }}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                       >
                         View
                       </button>
                       <button
-                        type="button"
                         onClick={() => handleEditCategory(index)}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
                       >
                         Edit
                       </button>
                       <button
-                        type="button"
                         onClick={() => handleDeleteCategory(category._id)}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                       >
                         Delete
                       </button>
-                    </>
+                    </div>
                   )}
                 </div>
               ))}

@@ -1,16 +1,17 @@
 import { BASE_URL } from "@/constants/apiDetails";
+import { Axios } from "@/lib/axiosInstance";
 
 export async function fetchCategories() {
-  const response = await fetch(`${BASE_URL}/category`);
-  return response.json();
+  const response = await Axios.get("/category");
+  return response.data;
 }
-export async function createPost(newPost) {
-  const response = await fetch(`${BASE_URL}/posts`, {
-    method: "POST",
+export async function createProductPost(formData) {
+  const response = await Axios.post("/product/create", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
-    body: JSON.stringify(newPost),
   });
-  return response.json();
+  // Use `.data` instead of `.json()` for Axios
+  console.log(response?.data);
+  return response.data;
 }

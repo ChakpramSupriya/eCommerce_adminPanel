@@ -7,11 +7,11 @@ import {
   BsListCheck,
   BsFillGearFill,
 } from "react-icons/bs";
-import { NavLink } from "react-router-dom";
-
-import { PiDressLight } from "react-icons/pi";
+import { MdOutlineViewCarousel } from "react-icons/md";
+import { FaCartArrowDown } from "react-icons/fa6";
 import NavLinkWithIcon from "./NavLinkWithIcon";
 import Logo from "../Logo";
+import { Link } from "react-router-dom";
 
 const Sidebar = ({ openSidebarToggle, OpenSidebar }) => {
   return (
@@ -20,25 +20,41 @@ const Sidebar = ({ openSidebarToggle, OpenSidebar }) => {
       className={openSidebarToggle ? "sidebar-responsive" : ""}
     >
       <div className="sidebar-title">
-        <Logo />
+        <Link to="/">
+          <Logo />
+        </Link>
         <span className="icon close_icon" onClick={OpenSidebar}>
           X
         </span>
       </div>
 
-      <ul className="sidebar-list">
-        <li className="sidebar-list-item">
+      <ul className="sidebar-list ">
+        <li className="sidebar-list-item  ">
           <NavLinkWithIcon
             to={"/"}
-            icon={<BsGrid1X2Fill className="icon" />}
+            icon={<BsGrid1X2Fill className="icon " />}
             label={"Dashboard"}
           />
         </li>
         <li className="sidebar-list-item">
           <NavLinkWithIcon
             to={"/products"}
-            icon={<BsFillArchiveFill className="icon" />}
+            icon={<BsFillArchiveFill className="icon " />}
             label={"Products"}
+          />
+        </li>
+        <li className="sidebar-list-item">
+          <NavLinkWithIcon
+            to={"/addproduct"}
+            icon={<FaCartArrowDown className="icon" />}
+            label={"AddProducts"}
+          />
+        </li>
+        <li className="sidebar-list-item">
+          <NavLinkWithIcon
+            to={"/carousel"}
+            icon={<MdOutlineViewCarousel className="icon " />}
+            label={"Carousel"}
           />
         </li>
         <li className="sidebar-list-item">
@@ -62,13 +78,7 @@ const Sidebar = ({ openSidebarToggle, OpenSidebar }) => {
             label={"Inventory"}
           />
         </li>
-        <li className="sidebar-list-item">
-          <NavLinkWithIcon
-            to={"/addproduct"}
-            icon={<BsListCheck className="icon" />}
-            label={"AddProducts"}
-          />
-        </li>
+
         <li className="sidebar-list-item">
           <NavLinkWithIcon
             to={"/setting"}

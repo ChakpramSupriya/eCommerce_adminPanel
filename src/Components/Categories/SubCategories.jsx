@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../Header/Header";
 import Sidebar from "../Sidebar/Sidebar";
-
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryMutationKeys } from "@/constants/queryMutationKeys";
 import { BASE_URL } from "@/constants/apiDetails";
 import { deleteCategory } from "@/api/deleteCategory";
@@ -19,7 +12,7 @@ import { createSubCategory } from "@/api/subcategory";
 const SubCategories = () => {
   const navigate = useNavigate();
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
-  const queryClient = new QueryClient();
+  const queryClient = useQueryClient();
 
   const getSubCategory = async () => {
     const categoryId = JSON.parse(localStorage.getItem("cId"));
@@ -27,13 +20,7 @@ const SubCategories = () => {
       `${BASE_URL}/subCategory/${categoryId}/getSubCategory`
     );
     const data = await response.json();
-
     setSubCategories(data.subCategory);
-
-    // console.log("data json");
-
-    // console.log(data.catego.map((category) => category.category.name));
-    // return data.map((category) => category.name);
     return data;
   };
 
@@ -41,13 +28,10 @@ const SubCategories = () => {
   const { data, error, isLoading } = useQuery({
     queryKey: ["subCategory"],
     queryFn: getSubCategory,
-    onSuccess: (data) => {
-      console.log(data);
-    },
   });
 
   const { mutate, isPending } = useMutation({
-    mutationKey: queryMutationKeys,
+    mutationKey: queryMutationKeys.createSubCategory,
     mutationFn: createSubCategory,
     onSuccess: () => {
       queryClient.invalidateQueries(["category"]);
@@ -68,11 +52,9 @@ const SubCategories = () => {
 
   const handleAddCategory = () => {
     if (subCategoryName.trim()) {
-      1;
       setSubCategories([...categories, { subCategoryName: subCategoryName }]);
       setNewSubCategory("");
     }
-    console.log(subCategoryName);
     mutate({
       subCategoryName,
     });
@@ -80,16 +62,15 @@ const SubCategories = () => {
 
   const handleEditCategory = (index) => {
     setIsEditing(index);
-    setEditCategory(categories[index].name);
+    setEditCategory(categories[index].subCategoryName);
   };
 
   const handleSaveEdit = (categoryId) => {
     const updatedCategories = [...categories];
-    updatedCategories[categoryId] = editCategory;
+    updatedCategories[categoryId] = { subCategoryName: editCategory };
     setSubCategories(updatedCategories);
     setIsEditing(null);
     setEditCategory("");
-    console.log(categoryId);
     handleUpdateCategory(categoryId, { name: editCategory });
   };
 
@@ -98,11 +79,10 @@ const SubCategories = () => {
     mutationFn: deleteCategory,
     onSuccess: () => {
       queryClient.invalidateQueries(["category"]);
-      toast.success("Category deleted successfully");
-      console.log("object deleted successfully");
+      toast.success("Subcategory deleted successfully");
     },
     onError: (error) => {
-      toast.error(`Failed to delete category: ${error.message}`);
+      toast.error(`Failed to delete subcategory: ${error.message}`);
     },
   });
 
@@ -119,11 +99,10 @@ const SubCategories = () => {
     mutationFn: updateCategory,
     onSuccess: () => {
       queryClient.invalidateQueries(["category"]);
-      toast.success("Category updated successfully");
-      console.log("Category updated successfully");
+      toast.success("Subcategory updated successfully");
     },
     onError: (error) => {
-      toast.error(`Failed to update category: ${error.message}`);
+      toast.error(`Failed to update subcategory: ${error.message}`);
     },
   });
 
@@ -132,31 +111,32 @@ const SubCategories = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="grid-container">
+      <Header OpenSidebar={OpenSidebar} />
       <Sidebar
         openSidebarToggle={openSidebarToggle}
         OpenSidebar={OpenSidebar}
-        className="w-64 bg-gray-800 text-white"
       />
       <div className="flex flex-col flex-grow">
-        <Header OpenSidebar={OpenSidebar} />
-        <div className="flex-grow p-6 bg-gray-100">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Subcategories</h2>
+        <div className="flex-grow p-6 ">
+          <div className="p-6 rounded-lg shadow-md max-w-4xl mx-auto bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              Subcategories
+            </h2>
 
             <div className="flex gap-2 mb-6">
               <input
                 type="text"
                 value={subCategoryName}
                 onChange={(e) => setNewSubCategory(e.target.value)}
-                placeholder="Add a new subcategory"
-                className="flex-grow p-2 border border-gray-300 rounded-lg"
+                placeholder="Enter new subcategory"
+                className="flex-grow p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 disabled={isPending}
                 type="submit"
                 onClick={handleAddCategory}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition"
               >
                 {isPending ? "Please wait..." : "Add Subcategory"}
               </button>
@@ -166,51 +146,51 @@ const SubCategories = () => {
               {categories.map((category, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow"
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100"
                 >
                   {isEditing === index ? (
-                    <div className="flex-grow flex gap-2">
+                    <div className="flex gap-2 w-full">
                       <input
                         type="text"
                         value={editCategory}
                         onChange={(e) => setEditCategory(e.target.value)}
-                        className="flex-grow p-2 border border-gray-300 rounded-lg"
+                        className="flex-grow p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <button
                         type="button"
                         onClick={() => handleSaveEdit(category._id)}
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                        className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                       >
                         Save
                       </button>
                       <button
                         type="button"
                         onClick={() => setIsEditing(null)}
-                        className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                        className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
                       >
                         Cancel
                       </button>
                     </div>
                   ) : (
-                    <>
-                      <span className="flex-grow">
+                    <div className="flex items-center gap-4 w-full">
+                      <span className="flex-grow text-gray-700 text-sm">
                         {category.subCategoryName}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleEditCategory(index)}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteCategory(category._id)}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                        className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                       >
                         Delete
                       </button>
-                    </>
+                    </div>
                   )}
                 </div>
               ))}

@@ -1,6 +1,7 @@
-import { BASE_URL } from "@/constants/apiDetails";
 import axios from "axios";
-
-export const AxiosInstance = axios.create({
-  baseURL: BASE_URL,
+// export const Url = "https://e-commerce-ten-rust.vercel.app";
+export const Url = "https://qfqhhctz-5000.inc1.devtunnels.ms/";
+// export const Url = "https://eyongkart.com/api";
+export const Axios = axios.create({
+  baseURL: Url,
 });

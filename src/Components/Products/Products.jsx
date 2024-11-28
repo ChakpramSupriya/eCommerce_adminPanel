@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Header from "../Header/Header";
 import Sidebar from "../Sidebar/Sidebar";
-import { Table, Button } from "@mantine/core";
+import { Table, Button, Loader, Notification } from "@mantine/core";
 import axios from "axios";
 import { BASE_URL } from "@/constants/apiDetails";
 import { fetchProducts } from "@/api/product";
 import { useQuery } from "@tanstack/react-query";
+import { CloudinaryConfig } from "@/lib/cloudinary";
 
 const Products = () => {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
-  const [products, setProducts] = useState([]);
 
   const {
-    data: allproduct,
-    isLoading,
+    data: allProduct,
+
     isError,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["product"],
     queryFn: fetchProducts,
@@ -25,114 +26,164 @@ const Products = () => {
     setOpenSidebarToggle(!openSidebarToggle);
   };
 
-  const getProduct = async () => {
-    try {
-      const { data } = await axios.get(`${BASE_URL}}/product/allproduct`);
-      setProducts(data.products);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const calculateDiscountedPrice = (price, discount) => {
     const discountAmount = (price * discount) / 100;
     return price - discountAmount;
   };
 
-  const handleDiscountChange = (index, newDiscount) => {
-    const updatedProducts = [...products];
-    updatedProducts[index].discount = newDiscount;
-    setProducts(updatedProducts);
-  };
-  if (isLoading) return "Loading...";
-  if (isError) return `Error: ${error.message}`;
-
   const updateDiscount = async (productId, discount) => {
     try {
-      await axios.patch(`${BASE_URL}/${productId}/updateDiscount`, {
+      await axios.patch(`${BASE_URL}/product/${productId}/updateDiscount`, {
         discount,
       });
-      getProduct();
-    } catch (error) {
-      console.log(error);
+      refetch();
+    } catch (err) {
+      console.error("Error updating discount:", err);
     }
   };
 
-  data.products.map((element, index) => {
-    return (
-      <Table.Tr key={element._id}>
-        <Table.Td>{element._id}</Table.Td>
-        <Table.Td
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-        >
-          <img
-            src={`http://drive.google.com/thumbnail?id=${element?.image_id[0]?.replace(
-              /"/g,
-              ""
-            )}`}
-            alt="data"
-            width={"40px"}
-            height={"40px"}
-            style={{ borderRadius: "50%" }}
-          />
-          <p>{element?.name}</p>
-        </Table.Td>
-        <Table.Td>{element?.category?.name}</Table.Td>
-        <Table.Td>{element.quantity}</Table.Td>
-        <Table.Td>₹ {element.price}</Table.Td>
-        <Table.Td>
-          <input
-            type="number"
-            value={element.discount || 0}
-            onChange={(e) => handleDiscountChange(index, e.target.value)}
-            style={{ width: "60px" }}
-          />
+  const handleDeleteProduct = async (productId) => {
+    try {
+      await axios.delete(`${BASE_URL}/product/${productId}`);
+      refetch();
+    } catch (err) {
+      console.error("Error deleting product:", err);
+    }
+  };
+
+  const rows = allProduct?.products?.map((element, index) => (
+    <Table.Tr
+      key={element._id}
+      className={`${
+        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+      } hover:bg-gray-100`}
+    >
+      {/* <Table.Td className="p-4 text-center border-b border-gray-200">
+        {element._id}
+      </Table.Td> */}
+      <Table.Td className="p-4 text-center border-b border-gray-200">
+        <img
+          src={`${
+            CloudinaryConfig.CLOUDINARY_URL
+          }/image/upload/${element?.image_id[0]?.replace(/"/g, "")}`}
+          alt="Product"
+          className="w-16 h-16 border border-gray-300 rounded-md shadow-sm"
+        />
+      </Table.Td>
+      <Table.Td className="pt-8 w-36  text-center border-gray-200 flex items-center ">
+        {element?.name}
+      </Table.Td>
+      <Table.Td className="p-4 text-center border-b border-gray-200">
+        {element?.category?.name}
+      </Table.Td>
+      <Table.Td className="p-4 text-center border-b border-gray-200">
+        {element.productquantity}
+      </Table.Td>
+      <Table.Td className="p-4 text-center border-b border-gray-200">
+        {element.averageRating} ({element.totalReviews})
+      </Table.Td>
+      <Table.Td className="p-4 text-center border-b border-gray-200">
+        ₹{element.price}
+      </Table.Td>
+      <Table.Td className="p-4 text-center border-b border-gray-200">
+        <input
+          type="number"
+          value={element.discount || 0}
+          onChange={(e) =>
+            updateDiscount(element._id, Number.parseFloat(e.target.value))
+          }
+          className="w-16 p-1 border border-gray-300 rounded"
+        />
+      </Table.Td>
+      <Table.Td className="p-4 text-center border-b border-gray-200">
+        ₹
+        {calculateDiscountedPrice(element.price, element.discount || 0).toFixed(
+          2
+        )}
+      </Table.Td>
+      <Table.Td className="p-4 text-center border-b border-gray-200">
+        <div className="flex justify-center gap-2">
           <Button
+            color="blue"
+            size="xs"
             onClick={() => updateDiscount(element._id, element.discount || 0)}
-            style={{ marginLeft: "10px" }}
           >
             Update
           </Button>
-        </Table.Td>
-        <Table.Td>
-          ₹{" "}
-          {calculateDiscountedPrice(
-            element.price,
-            element.discount || 0
-          ).toFixed(2)}
-        </Table.Td>
-      </Table.Tr>
-    );
-  });
+          <Button
+            color="red"
+            size="xs"
+            onClick={() => handleDeleteProduct(element._id)}
+          >
+            Delete
+          </Button>
+        </div>
+      </Table.Td>
+    </Table.Tr>
+  ));
 
-  useEffect(() => {
-    getProduct();
-  }, []);
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-64">
+  //       <Loader />
+  //     </div>
+  //   );
+  // }
+
+  if (isError) {
+    return (
+      <div className="m-8">
+        <Notification title="Error" color="red">
+          Failed to load products: {error.message}
+        </Notification>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div className="grid-container">
-        <Header OpenSidebar={OpenSidebar} />
-        <Sidebar
-          openSidebarToggle={openSidebarToggle}
-          OpenSidebar={OpenSidebar}
-        />
-        <div>
-          <Table>
+    <div className="grid-container">
+      <Header OpenSidebar={OpenSidebar} />
+      <Sidebar
+        openSidebarToggle={openSidebarToggle}
+        OpenSidebar={OpenSidebar}
+      />
+      <div className="m-4 shadow-md rounded-md">
+        <div
+          className="overflow-auto"
+          style={{ maxHeight: "80vh", maxWidth: "100%" }}
+        >
+          <Table className="w-full border-collapse border border-gray-300">
             <Table.Thead>
-              <Table.Tr>
-                <Table.Th style={{ textAlign: "center" }}>ID</Table.Th>
-                <Table.Th style={{ textAlign: "center" }}>
+              <Table.Tr className="bg-gray-200 text-gray-700 uppercase text-sm sticky top-0 z-10">
+                {/* <Table.Th className="p-4 text-center border-b border-gray-300">
+                  ID
+                </Table.Th> */}
+                <Table.Th className="p-4 text-center border-b border-gray-300">
+                  Image
+                </Table.Th>
+                <Table.Th className=" text-center border-b border-gray-300">
                   Product Name
                 </Table.Th>
-                <Table.Th style={{ textAlign: "center" }}>Category</Table.Th>
-                <Table.Th style={{ textAlign: "center" }}>Quantity</Table.Th>
-                <Table.Th style={{ textAlign: "center" }}>Price</Table.Th>
-                <Table.Th style={{ textAlign: "center" }}>
+                <Table.Th className="p-4 text-center border-b border-gray-300">
+                  Category
+                </Table.Th>
+                <Table.Th className="p-4 text-center border-b border-gray-300">
+                  Quantity
+                </Table.Th>
+                <Table.Th className="p-4 text-center border-b border-gray-300">
+                  Rating (Total Reviews)
+                </Table.Th>
+                <Table.Th className="p-4 text-center border-b border-gray-300">
+                  Price
+                </Table.Th>
+                <Table.Th className="p-4 text-center border-b border-gray-300">
                   Discount (%)
                 </Table.Th>
-                <Table.Th style={{ textAlign: "center" }}>
+                <Table.Th className="p-4 text-center border-b border-gray-300">
                   Discounted Price
+                </Table.Th>
+                <Table.Th className="p-4 text-center border-b border-gray-300">
+                  Actions
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -140,7 +191,7 @@ const Products = () => {
           </Table>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

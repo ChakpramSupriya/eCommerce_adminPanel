@@ -28,6 +28,7 @@ import {
   PieChart,
   Pie,
 } from "recharts";
+import { Loader } from "@mantine/core";
 
 const Home = () => {
   const data = [
@@ -54,7 +55,6 @@ const Home = () => {
     { name: "A2", value: 300 },
   ];
 
-  // Fetch products
   const products = async () => {
     const response = await fetch(`${BASE_URL}/product/total`);
 
@@ -74,7 +74,6 @@ const Home = () => {
     queryFn: products,
   });
 
-  // Fetch categories
   const categories = async () => {
     const response = await fetch(`${BASE_URL}/category/categoryCount`);
 
@@ -93,9 +92,7 @@ const Home = () => {
     queryKey: ["category"],
     queryFn: categories,
   });
-  // console.log(category);
 
-  //fetch customers
   const customers = async () => {
     const response = await fetch(`${BASE_URL}/user/totalUsers`);
 
@@ -115,7 +112,11 @@ const Home = () => {
     queryFn: customers,
   });
   if (isProductLoading || isCategoryLoading || isCustomerLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader />
+      </div>
+    );
   }
 
   if (productError || categoryError || isCustomerLoading) {
@@ -135,7 +136,7 @@ const Home = () => {
         <h3>DASHBOARD</h3>
       </div>
 
-      <div className="main-cards">
+      <div className="main-cards gap-10 ">
         <div className="card">
           <div className="card-inner">
             <h3>PRODUCTS</h3>
@@ -156,13 +157,6 @@ const Home = () => {
             <BsPeopleFill className="card_icon" />
           </div>
           <h1>{customer ? customer.total : "No Customer"}</h1>
-        </div>
-        <div className="card">
-          <div className="card-inner">
-            <h3>ALERTS</h3>
-            <BsFillBellFill className="card_icon" />
-          </div>
-          <h1>42</h1>
         </div>
       </div>
 
