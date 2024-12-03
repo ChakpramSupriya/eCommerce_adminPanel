@@ -13,8 +13,10 @@ import { Select } from "@mantine/core";
 import { fetchCollection } from "@/api/collection";
 import { toast } from "react-toastify";
 import { fetchCategory } from "@/api/Category";
+import { fetchProducts, updateProduct } from "@/api/product";
+import { useParams } from "react-router-dom";
 
-const AddProduct = () => {
+const UpdateProduct = () => {
   const [isPending, setIsPending] = useState();
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
   const [name, setName] = useState("");
@@ -36,8 +38,13 @@ const AddProduct = () => {
   const [collectionName, setCollectionName] = useState("");
   const [selectedSubCategoryName, setSelectedSubCategoryName] = useState("");
   // const [editingProduct, setEditingProduct] = useState(null);
-
   const queryClient = useQueryClient();
+  const { id } = useParams();
+  //get
+  const { data: productlist } = useQuery({
+    queryKey: ["productdata"],
+    queryFn: fetchProducts,
+  });
   const {
     data: categorylist,
     isLoading: isLoadingCategories,
@@ -63,12 +70,7 @@ const AddProduct = () => {
   }, [category]);
 
   // console.log("categorylist", subList);
-  const {
-    data: collectionlist,
-    isLoading: isLoadingCollections,
-    isError: isCollectionError,
-    error: collectionError,
-  } = useQuery({
+  const { data: collectionlist } = useQuery({
     queryKey: ["collection"],
     queryFn: fetchCollection,
   });
@@ -126,9 +128,9 @@ const AddProduct = () => {
     setOpenSidebarToggle(!openSidebarToggle);
   };
 
-  const { mutate: handleSubmitProductPost } = useMutation({
-    mutationKey: ["postproduct"],
-    mutationFn: createProductPost,
+  const { mutate: handleSubmitUpdateProduct } = useMutation({
+    mutationKey: ["updateproduct", id],
+    mutationFn: (formData) => updateProduct(id, formData),
     onSuccess: () => {
       toast.success("Product added successfully");
       queryClient.invalidateQueries({ queryKey: ["productdata"] });
@@ -137,11 +139,44 @@ const AddProduct = () => {
       toast.error(`Failed to add product: ${error.message}`);
     },
   });
-  //ADD
-  const addProduct = async (event) => {
+  useEffect(() => {
+    if (productlist) {
+      const product = productlist?.products.find(
+        (product) => product._id === id
+      );
+      if (product) {
+        console.log("product", product);
+        setName(product.name);
+        setDescription(product.description);
+        setPrice(product.price);
+        setDiscount(product.discount);
+        setDiscountedPrice(product.discountedPrice);
+        setQuantity(product.productquantity);
+        setSizelength(product.sizelength);
+        setSizewidth(product.sizewidth);
+        setGender(product.gender);
+        setIsProductForKids(product.isProductForKids);
+        setCategory(product.category._id);
+        setCollection(product.collection._id);
+        setSubCategory(product.subcategory._id);
+        setImage(product.image_id);
+
+        // setSubCategory(product.subcategories);
+        // setCategory(product.category); // Assuming `category` object contains `_id`
+        // setSubCategory(product.subcategories); // Assuming subcategory is an object with `_id`
+        // setCollection(product.collection); // Assuming collection contains `_id`
+        // setSelectedCategory(product.category);
+      }
+    }
+  }, [productlist, id]);
+  console.log(category);
+  console.log("collectionName", collection);
+  console.log("Subcategory", subCategory);
+  console.log("image", image);
+  //update
+  const handleUpdateProduct = async (event) => {
     event.preventDefault();
     const formData = new FormData();
-
     formData.append("name", name);
     formData.append("description", description);
     formData.append("price", price);
@@ -164,8 +199,7 @@ const AddProduct = () => {
     for (const [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }
-
-    handleSubmitProductPost(formData);
+    handleSubmitUpdateProduct({ _id: id, formData });
   };
 
   if (isLoadingCategories)
@@ -189,10 +223,10 @@ const AddProduct = () => {
         <Box>
           <form
             className="shadow-xl rounded-lg m-5 p-5 w-full"
-            onSubmit={addProduct}
+            onSubmit={handleUpdateProduct}
           >
             <h1 className="text-gray-800 text-3xl font-bold tracking-wide my-5">
-              Add Product
+              Update Product
             </h1>
             <div className="grid gap-2">
               <FormItem>
@@ -304,7 +338,7 @@ const AddProduct = () => {
                   Category
                 </label>
                 <Select
-                  placeholder={"Please select a category"}
+                  placeholder="Please select a category"
                   data={categorylist?.categories?.map((category) => ({
                     label: category.name,
                     value: category._id,
@@ -388,7 +422,7 @@ const AddProduct = () => {
                 />
               </FormItem>
               <Button disabled={isPending} type="submit" className="my-10">
-                {isPending ? "Please wait..." : "Add Product"}
+                {isPending ? "Please wait..." : "Update Product"}
               </Button>
             </div>
           </form>
@@ -398,4 +432,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default UpdateProduct;

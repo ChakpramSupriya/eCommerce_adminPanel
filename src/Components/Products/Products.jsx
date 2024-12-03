@@ -1,24 +1,25 @@
 import React, { useState } from "react";
 import Header from "../Header/Header";
 import Sidebar from "../Sidebar/Sidebar";
-import { Table, Button, Loader, Notification } from "@mantine/core";
-import axios from "axios";
-import { BASE_URL } from "@/constants/apiDetails";
-import { fetchProducts } from "@/api/product";
-import { useQuery } from "@tanstack/react-query";
+import { Table, Button, Notification } from "@mantine/core";
+import Swal from "sweetalert2";
+import { deleteProduct, fetchProducts } from "@/api/product";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CloudinaryConfig } from "@/lib/cloudinary";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const Products = () => {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
-
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const {
     data: allProduct,
-
     isError,
     error,
     refetch,
   } = useQuery({
-    queryKey: ["product"],
+    queryKey: ["productlist"],
     queryFn: fetchProducts,
   });
 
@@ -31,25 +32,72 @@ const Products = () => {
     return price - discountAmount;
   };
 
-  const updateDiscount = async (productId, discount) => {
-    try {
-      await axios.patch(`${BASE_URL}/product/${productId}/updateDiscount`, {
-        discount,
-      });
-      refetch();
-    } catch (err) {
-      console.error("Error updating discount:", err);
-    }
+  // const updateDiscount = async (productId, discount) => {
+  //   try {
+  //     await axios.patch(`${BASE_URL}/product/${productId}/updateDiscount`, {
+  //       discount,
+  //     });
+  //     refetch();
+  //   } catch (err) {
+  //     console.error("Error updating discount:", err);
+  //   }
+  // };
+
+  //update
+  const handleUpdateProduct = (productId) => {
+    navigate(`/updateproduct/${productId}`);
   };
 
-  const handleDeleteProduct = async (productId) => {
-    try {
-      await axios.delete(`${BASE_URL}/product/${productId}`);
-      refetch();
-    } catch (err) {
-      console.error("Error deleting product:", err);
-    }
+  //delete
+  const handleDeleteProduct = (id) => {
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton:
+          "bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md",
+        cancelButton:
+          "bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md",
+        actions: "flex space-x-4",
+      },
+      buttonsStyling: false,
+    });
+    swalWithBootstrapButtons
+      .fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deleteProductMutation(id);
+          swalWithBootstrapButtons.fire({
+            title: "Deleted!",
+            text: "The Product has been deleted.",
+            icon: "success",
+          });
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire({
+            title: "Cancelled",
+            text: "Your product is safe ",
+            icon: "error",
+          });
+        }
+      });
   };
+
+  const { mutate: deleteProductMutation } = useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: () => {
+      toast.success("Product deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["productlist"] });
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete: ${error.message}`);
+    },
+  });
 
   const rows = allProduct?.products?.map((element, index) => (
     <Table.Tr
@@ -106,7 +154,7 @@ const Products = () => {
           <Button
             color="blue"
             size="xs"
-            onClick={() => updateDiscount(element._id, element.discount || 0)}
+            onClick={() => handleUpdateProduct(element._id)}
           >
             Update
           </Button>

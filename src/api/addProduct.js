@@ -1,4 +1,3 @@
-import { BASE_URL } from "@/constants/apiDetails";
 import { Axios } from "@/lib/axiosInstance";
 
 export async function fetchCategories() {

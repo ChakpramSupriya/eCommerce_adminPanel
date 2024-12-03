@@ -24,6 +24,9 @@ import Signup from "./Components/Registration/Signup.jsx";
 import Message from "./Components/Others/Message.jsx";
 import Notification from "./Components/Others/Notification.jsx";
 import Carousel from "./Components/Carousel/Carousel.jsx";
+import AdditionalData from "./Components/Header/Additional/AdditionalData.jsx";
+import Footer from "./Components/Header/Additional/Footer.jsx";
+import UpdateProduct from "./Components/Addproduct/UpdateProduct.jsx";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +39,12 @@ const router = createBrowserRouter(
       <Route path="/categories" element={<Categories />} />
       <Route path="/customers" element={<Customers />} />
       <Route path="/inventory" element={<Inventory />} />
-      <Route path="/addproduct" element={<AddProduct />} />
+
+      <Route>
+        <Route path="/addproduct" element={<AddProduct />} />
+        {/* <Route path="/addproduct/:id" element={<AddProduct />} /> */}
+        <Route path="/updateproduct/:id" element={<UpdateProduct />} />
+      </Route>
       <Route path="/setting" element={<Setting />} />
       <Route path="/categories/:categoryname" element={<SubCategories />} />
 
@@ -45,6 +53,9 @@ const router = createBrowserRouter(
 
       <Route path="/message" element={<Message />} />
       <Route path="/notification" element={<Notification />} />
+
+      <Route path="/additionaldata" element={<AdditionalData />} />
+      <Route path="/footer" element={<Footer />} />
     </Route>
   )
 );

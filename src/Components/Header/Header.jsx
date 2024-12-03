@@ -6,7 +6,8 @@ import {
   BsFillEnvelopeFill,
   BsPersonCircle,
 } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import AdditionalData from "./Additional/AdditionalData";
 
 const Header = ({ OpenSidebar, onSearch }) => {
   return (
@@ -28,6 +29,12 @@ const Header = ({ OpenSidebar, onSearch }) => {
       </div>
 
       <div className="header-right flex items-center gap-4 text-gray-700">
+        <NavLink>
+          <AdditionalData
+            className="icon bg-red-400 text-xl cursor-pointer hover:text-gray-900"
+            title="Button"
+          />
+        </NavLink>
         <div className="relative">
           <Link to="/notification">
             <BsFillBellFill

@@ -27,12 +27,12 @@ const Carousel = () => {
   const [editingCarousel, setEditingCarousel] = useState(null);
 
   const queryClient = useQueryClient();
-  // Fetch carousel data using React Query
+
   const { data: carouselList } = useQuery({
     queryKey: ["carousel"],
     queryFn: fetchCarousel,
   });
-  // console.log("carousel", carouselList.list);
+  // console.log("carousel", carouselList?.list);
 
   const toggleSidebar = () => {
     setOpenSidebarToggle(!openSidebarToggle);
@@ -53,7 +53,7 @@ const Carousel = () => {
       toast.error(`Failed to add carousel: ${error.message}`);
     },
   });
-
+  //add
   const handleAddCarousel = async (event) => {
     event.preventDefault();
     const formData = new FormData();
@@ -303,44 +303,47 @@ const Carousel = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {carouselList?.list?.map((product, id) => (
-                    <tr key={product._id} className="hover:bg-gray-50">
-                      <td className="border border-gray-200 p-2">
-                        <img
-                          src={`${CloudinaryConfig.CLOUDINARY_URL}/image/upload/${product.img_id}`}
-                          alt=""
-                          className="w-16 h-16 border border-gray-300 rounded-md shadow-sm"
-                        />
-                      </td>
-                      <td className="border border-gray-200 p-2">
-                        {product.subtitle}
-                      </td>
-                      <td className="border border-gray-200 p-2">
-                        {product.title}
-                      </td>
-                      <td className="border border-gray-200 p-2">
-                        {product.title2}
-                      </td>
-                      <td className="p-4 text-center border-b border-gray-200">
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            color="blue"
-                            size="xs"
-                            onClick={() => handleEditClick(product)}
-                          >
-                            Update
-                          </Button>
-                          <Button
-                            color="red"
-                            size="xs"
-                            onClick={() => handleDeleteCarousel(product._id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {carouselList?.list
+                    ?.slice()
+                    .reverse()
+                    .map((product, id) => (
+                      <tr key={product._id} className="hover:bg-gray-50">
+                        <td className="border border-gray-200 p-2">
+                          <img
+                            src={`${CloudinaryConfig.CLOUDINARY_URL}/image/upload/${product.img_id}`}
+                            alt=""
+                            className="w-16 h-16 border border-gray-300 rounded-md shadow-sm"
+                          />
+                        </td>
+                        <td className="border border-gray-200 p-2">
+                          {product.subtitle}
+                        </td>
+                        <td className="border border-gray-200 p-2">
+                          {product.title}
+                        </td>
+                        <td className="border border-gray-200 p-2">
+                          {product.title2}
+                        </td>
+                        <td className="p-4 text-center border-b border-gray-200">
+                          <div className="flex justify-center gap-2">
+                            <Button
+                              color="blue"
+                              size="xs"
+                              onClick={() => handleEditClick(product)}
+                            >
+                              Update
+                            </Button>
+                            <Button
+                              color="red"
+                              size="xs"
+                              onClick={() => handleDeleteCarousel(product._id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             ) : (
