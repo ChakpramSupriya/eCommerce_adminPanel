@@ -30,6 +30,15 @@ function AdditionalData() {
             Footer
           </Menu.Item>
         </NavLink>
+        <NavLink to="/footerheader">
+          <Menu.Item
+            leftSection={
+              <IconSettings style={{ width: rem(14), height: rem(14) }} />
+            }
+          >
+            Footer Header
+          </Menu.Item>
+        </NavLink>
 
         <Menu.Divider />
 

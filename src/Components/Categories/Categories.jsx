@@ -24,7 +24,6 @@ const Categories = () => {
   const [isProductForKids, setIsProductForKids] = useState("");
   const [gender, setGender] = useState("");
   const [isEditing, setIsEditing] = useState(null);
-  const [editCategory, setEditCategory] = useState("");
   const [editingCategory, setEditingCategory] = useState(null);
 
   const queryClient = useQueryClient();
@@ -112,14 +111,6 @@ const Categories = () => {
     updateCategoryMutate({ id: editingCategory._id, formData });
   };
 
-  const handleSaveEdit = (categoryId) => {
-    const updatedCategories = [...categories];
-    updatedCategories[categoryId] = editCategory;
-    setCategories(updatedCategories);
-    setIsEditing(null);
-    setEditCategory("");
-    handleUpdateCategory(categoryId, { name: editCategory });
-  };
   //delete
   const handleDeleteCategory = (id) => {
     const swalWithBootstrapButtons = Swal.mixin({

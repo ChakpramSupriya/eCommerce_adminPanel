@@ -1,120 +1,113 @@
 import React, { useState } from "react";
-import Header from "../Header/Header";
-import Sidebar from "../Sidebar/Sidebar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { queryMutationKeys } from "@/constants/queryMutationKeys";
-import { BASE_URL } from "@/constants/apiDetails";
-import {
-  createSubCategory,
-  deleteSubCategory,
-  updateSubCategory,
-} from "@/api/subcategory";
 import { ScrollArea } from "@mantine/core";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
+import Header from "../Header";
+import Sidebar from "@/Components/Sidebar/Sidebar";
+import {
+  createFooterHeader,
+  deleteFooterHeader,
+  fetchFooterHeader,
+  updateFooterHeader,
+} from "@/api/footerLink";
+import { queryMutationKeys } from "@/constants/queryMutationKeys";
+import { useNavigate } from "react-router-dom";
 
-const SubCategories = () => {
+const FooterHeader = () => {
+  const navigate = useNavigate();
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
-  const [subCategoryName, setNewSubCategory] = useState("");
+  const [footerHeaderName, setNewFooterHeader] = useState("");
   const [isEditing, setIsEditing] = useState(null);
-  const [editSubCategory, setEditSubCategory] = useState("");
-  const [subCategories, setSubCategories] = useState([]);
+  const [editFooterHeader, setEditFooterHeader] = useState("");
+  const [footerHeader, setFooterHeader] = useState([]);
   const queryClient = useQueryClient();
 
   const OpenSidebar = () => {
     setOpenSidebarToggle(!openSidebarToggle);
   };
 
-  const getSubCategory = async () => {
-    const categoryId = JSON.parse(localStorage.getItem("cId"));
-    const response = await fetch(
-      `${BASE_URL}/subCategory/${categoryId}/getSubCategory`
-    );
-    const data = await response.json();
-    setSubCategories(data.subCategory);
-    return data;
-  };
-
   //get
-  const { data } = useQuery({
-    queryKey: ["subcategory"],
-    queryFn: getSubCategory,
+  const { data: footerData } = useQuery({
+    queryKey: ["footerheader"],
+    queryFn: fetchFooterHeader,
   });
+  // console.log("footer", footerData?.footerSubHeading);
   //create
   const { mutate, isPending } = useMutation({
-    mutationKey: queryMutationKeys.createSubCategory,
-    mutationFn: createSubCategory,
+    mutationKey: queryMutationKeys.createFooterHeader,
+    mutationFn: createFooterHeader,
     onSuccess: () => {
-      queryClient.invalidateQueries(["subcategory"]);
-      toast.success("SubCategory added successfully");
+      queryClient.invalidateQueries(["footerheader"]);
+      toast.success("Footer header added successfully");
     },
     onError: (error) => {
-      toast.error(`Failed to add subcategory: ${error.message}`);
+      toast.error(`Failed to add footerheader: ${error.message}`);
     },
   });
   //add
-  const handleAddSubCategory = () => {
-    const category = JSON.parse(localStorage.getItem("cId"));
-
-    if (subCategoryName.trim()) {
-      setSubCategories([...subCategories, { subCategoryName }]);
-      setNewSubCategory("");
-
+  const handleAddFooterHeader = () => {
+    const footerSubHeading = JSON.parse(localStorage.getItem("footerId"));
+    if (footerHeaderName.trim()) {
+      setFooterHeader([...footerHeader, { name: footerHeaderName }]);
+      setNewFooterHeader("");
       mutate({
-        subCategoryName,
-        category,
+        name: footerHeaderName,
+        footerSubHeading,
       });
+    } else {
+      toast.error("Footer header name cannot be empty");
     }
   };
 
   //update
-  const { mutate: updateCategoryMutate } = useMutation({
-    mutationFn: ({ id, updatedData }) => updateSubCategory(id, updatedData),
+  const { mutate: updateFooterHeaderMutate } = useMutation({
+    mutationFn: ({ id, updatedData }) => updateFooterHeader(id, updatedData),
     onSuccess: () => {
-      toast.success("Subcategory updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["subcategory"] });
+      toast.success("Footer header updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["footerheader"] });
     },
     onError: (error) => {
       console.error(
-        "Error updating subcategory:",
+        "Error updating footerheader:",
         error.response?.data || error.message
       );
       toast.error(
-        `Failed to update subcategory: ${
+        `Failed to update footerheader: ${
           error.response?.data?.message || error.message
         }`
       );
     },
   });
 
-  const handleUpdateCategory = (id, updatedData) => {
-    updateCategoryMutate({ id, updatedData });
+  const handleUpdateFooterHeader = (id, updatedData) => {
+    updateFooterHeaderMutate({ id, updatedData });
   };
 
   //edit
-  const handleEditCategory = (index) => {
+  const handleEditFooterHeader = (index) => {
     setIsEditing(index);
-    setEditSubCategory(subCategories[index].subCategoryName);
+    setEditFooterHeader(footerHeader[index].footerHeaderName);
   };
 
   const handleSaveEdit = (categoryIndex) => {
-    const updatedCategories = [...subCategories];
+    const updatedCategories = [...footerHeader];
     updatedCategories[categoryIndex] = {
-      ...subCategories[categoryIndex],
-      subCategoryName: editSubCategory,
+      ...footerHeader[categoryIndex],
+      footerHeaderName: editFooterHeader,
     };
-    setSubCategories(updatedCategories);
+    setFooterHeader(updatedCategories);
     setIsEditing(null);
-    setEditSubCategory("");
+    setEditFooterHeader("");
 
-    const categoryToUpdate = subCategories[categoryIndex];
-    handleUpdateCategory(categoryToUpdate._id, {
-      subCategoryName: editSubCategory,
+    const categoryToUpdate = footerHeader[categoryIndex];
+    handleUpdateFooterHeader(categoryToUpdate._id, {
+      footerHeaderName: editFooterHeader,
     });
   };
 
-  //delete
-  const handleDeleteCategory = (id) => {
+  //   //delete
+  const handleDeleteFooterHeader = (id) => {
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
         confirmButton:
@@ -137,34 +130,32 @@ const SubCategories = () => {
       })
       .then((result) => {
         if (result.isConfirmed) {
-          deleteSubCategoryMutation(id);
+          deleteFooterHeaderMutation(id);
 
           swalWithBootstrapButtons.fire({
             title: "Deleted!",
-            text: "The category has been deleted.",
+            text: "The footer header has been deleted.",
             icon: "success",
           });
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           swalWithBootstrapButtons.fire({
             title: "Cancelled",
-            text: "Your category is safe ",
+            text: "Your footer header is safe ",
             icon: "error",
           });
         }
       });
   };
-
-  const { mutate: deleteSubCategoryMutation } = useMutation({
-    mutationFn: deleteSubCategory,
+  const { mutate: deleteFooterHeaderMutation } = useMutation({
+    mutationFn: deleteFooterHeader,
     onSuccess: () => {
-      toast.success("SubCategory deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ["subcategory"] });
+      toast.success("Footer header deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["footerheader"] });
     },
     onError: (error) => {
       toast.error(`Failed to delete: ${error.message}`);
     },
   });
-
   return (
     <div className="grid-container">
       <Header OpenSidebar={OpenSidebar} />
@@ -175,25 +166,25 @@ const SubCategories = () => {
       <div className="flex flex-col flex-grow p-4 pb-8  ">
         <div className="flex-grow  rounded-lg shadow-lg p-10 mb-6 ">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Subcategories
+            Footer Header
           </h2>
 
           <div className="flex gap-2 mb-6">
             <input
               type="text"
-              value={subCategoryName}
-              onChange={(e) => setNewSubCategory(e.target.value)}
-              placeholder="Enter new subcategory"
+              value={footerHeaderName}
+              onChange={(e) => setNewFooterHeader(e.target.value)}
+              placeholder="Enter footer header"
               className="flex-grow p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             <button
               disabled={isPending}
               type="submit"
-              onClick={handleAddSubCategory}
+              onClick={handleAddFooterHeader}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition"
             >
-              {isPending ? "Please wait..." : "Add Subcategory"}
+              {isPending ? "Please wait..." : "Add Footer Header"}
             </button>
           </div>
           <ScrollArea
@@ -204,25 +195,25 @@ const SubCategories = () => {
             type="always"
           >
             <div className="space-y-4 ">
-              {subCategories
+              {footerData?.footerSubHeading
                 ?.slice()
                 .reverse()
-                ?.map((category, index) => (
+                ?.map((footersub, id) => (
                   <div
-                    key={index}
+                    key={footersub._id}
                     className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-lg border border-gray-200 transition"
                   >
-                    {isEditing === index ? (
+                    {isEditing === id ? (
                       <div className="flex gap-2 w-full">
                         <input
                           type="text"
-                          value={editSubCategory}
-                          onChange={(e) => setEditSubCategory(e.target.value)}
+                          value={editFooterHeader}
+                          onChange={(e) => setEditFooterHeader(e.target.value)}
                           className="flex-grow p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <button
                           type="button"
-                          onClick={() => handleSaveEdit(index)}
+                          onClick={() => handleSaveEdit(id)}
                           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                         >
                           Save
@@ -238,18 +229,31 @@ const SubCategories = () => {
                     ) : (
                       <div className="flex items-center gap-4 w-full ">
                         <span className="flex-grow text-gray-700 text-sm">
-                          {category.subCategoryName}
+                          {footersub.name}
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleEditCategory(index)}
+                          onClick={() => {
+                            localStorage.setItem(
+                              "footerId",
+                              JSON.stringify(footersub._id)
+                            );
+                            navigate(`/footerheader/${footersub.name}`);
+                          }}
+                          className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                          View
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleEditFooterHeader(id)}
                           className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDeleteCategory(category._id)}
+                          onClick={() => handleDeleteFooterHeader(id)}
                           className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                         >
                           Delete
@@ -267,4 +271,4 @@ const SubCategories = () => {
   );
 };
 
-export default SubCategories;
+export default FooterHeader;

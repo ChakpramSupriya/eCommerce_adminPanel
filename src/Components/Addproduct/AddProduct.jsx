@@ -62,18 +62,10 @@ const AddProduct = () => {
     fetchSubcategoriesForCategory();
   }, [category]);
 
-  // console.log("categorylist", subList);
-  const {
-    data: collectionlist,
-    isLoading: isLoadingCollections,
-    isError: isCollectionError,
-    error: collectionError,
-  } = useQuery({
+  const { data: collectionlist } = useQuery({
     queryKey: ["collection"],
     queryFn: fetchCollection,
   });
-  // console.log("collection", collectionlist);
-
   const handleChangeCategory = (categoryId) => {
     // console.log("category", categoryId);
     const selectedCategoryName = categorylist?.categories?.find(
@@ -95,6 +87,7 @@ const AddProduct = () => {
       setSubCategory(subCategoryId);
     }
   };
+
   const handleChangeCollection = (collectionId) => {
     const collectionName = collectionlist?.collection.find(
       (collection) => collection._id === collectionId
@@ -326,7 +319,7 @@ const AddProduct = () => {
                   }))}
                   value={subCategory}
                   disabled={!category || subList?.length === 0}
-                  onChange={handleChangeSubCategory} // Disable if no category is selected
+                  onChange={handleChangeSubCategory}
                 />
               </FormItem>
               <FormItem>

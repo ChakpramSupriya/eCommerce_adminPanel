@@ -27,6 +27,9 @@ import Carousel from "./Components/Carousel/Carousel.jsx";
 import AdditionalData from "./Components/Header/Additional/AdditionalData.jsx";
 import Footer from "./Components/Header/Additional/Footer.jsx";
 import UpdateProduct from "./Components/Addproduct/UpdateProduct.jsx";
+import FooterHeader from "./Components/Header/Additional/FooterHeader.jsx";
+import FooterLink from "./Components/Header/Additional/FooterLink.jsx";
+import ManageSeller from "./Components/ManageSeller/ManageSeller.jsx";
 
 const queryClient = new QueryClient();
 
@@ -36,13 +39,13 @@ const router = createBrowserRouter(
       <Route index element={<App />} />
       <Route path="/products" element={<Products />} />
       <Route path="/carousel" element={<Carousel />} />
-      <Route path="/categories" element={<Categories />} />
       <Route path="/customers" element={<Customers />} />
+      <Route path="/manageseller" element={<ManageSeller />} />
+      <Route path="/categories" element={<Categories />} />
       <Route path="/inventory" element={<Inventory />} />
 
       <Route>
         <Route path="/addproduct" element={<AddProduct />} />
-        {/* <Route path="/addproduct/:id" element={<AddProduct />} /> */}
         <Route path="/updateproduct/:id" element={<UpdateProduct />} />
       </Route>
       <Route path="/setting" element={<Setting />} />
@@ -56,6 +59,8 @@ const router = createBrowserRouter(
 
       <Route path="/additionaldata" element={<AdditionalData />} />
       <Route path="/footer" element={<Footer />} />
+      <Route path="/footerheader" element={<FooterHeader />} />
+      <Route path="/footerheader/:footername" element={<FooterLink />} />
     </Route>
   )
 );

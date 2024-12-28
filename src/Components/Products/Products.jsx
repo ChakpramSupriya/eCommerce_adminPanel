@@ -22,6 +22,7 @@ const Products = () => {
     queryKey: ["productlist"],
     queryFn: fetchProducts,
   });
+  console.log("all product list", allProduct);
 
   const OpenSidebar = () => {
     setOpenSidebarToggle(!openSidebarToggle);
@@ -169,14 +170,6 @@ const Products = () => {
       </Table.Td>
     </Table.Tr>
   ));
-
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center h-64">
-  //       <Loader />
-  //     </div>
-  //   );
-  // }
 
   if (isError) {
     return (
